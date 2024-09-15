@@ -5,7 +5,6 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const handleLogin = async (req, res) => {
-  console.log("Login request received");
   const { email, password } = req.body;
   if (!email || !password) {
     return res
@@ -30,6 +29,21 @@ const handleLogin = async (req, res) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "1h" }
     );
+    const refreshToken = jwt.sign(
+      { id: user.id },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Store refresh token in the database
+    await User.updateRefreshToken(user.id, refreshToken);
+    res.cookie("jwt", refreshToken, {
+      httpOnly: true,
+      sameSite: "None",
+      secure: true,
+      maxAge: 86400000,
+    });
+
     res.status(200).json({ accessToken, message: "Login successful" });
   } catch (err) {
     console.error(err);

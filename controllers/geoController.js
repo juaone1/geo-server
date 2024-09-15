@@ -4,6 +4,7 @@ const History = require("../db/models/History");
 const handleGetGeoInfo = async (req, res) => {
   const { ip_address } = req.params;
   const user_id = req.user.id;
+  console.log(user_id);
   if (!ip_address) {
     return res.status(400).json({ error: "IP address is required" });
   }
